@@ -33,35 +33,6 @@ At **Saphyre Solutions LLC**, we drive innovation through diverse, cutting-edge 
 
 Through these domains, **Saphyre Solutions LLC** continues to push technological boundaries while fostering a collaborative and supportive environment for all team members.
 
-## 💼 Meet the Teams
-
-Our teams are the driving force behind Saphyre Solutions. Each one plays a critical role in pushing our projects forward with expertise and innovation. Here’s a look at our core teams and how you can get in touch:
-
-🔹 **Software Development Team** – Specializes in building robust, scalable applications across various platforms.
-   - 📧 **Contact:** [Software@SaphyreSolutions.com](mailto:Software@SaphyreSolutions.com)
-
-🔹 **DevOps & Automation Team** – Focuses on automating workflows, managing CI/CD pipelines, and optimizing infrastructure.
-   - 📧 **Contact:** [DevOps@SaphyreSolutions.com](mailto:DevOps@SaphyreSolutions.com)
-
-🔹 **Cloud Engineering Team** – Manages cloud deployments, scalability, and cloud security on AWS, Azure, and Google Cloud.
-   - 📧 **Contact:** [Cloud@SaphyreSolutions.com](mailto:Cloud@SaphyreSolutions.com)
-
-🔹 **Cybersecurity Team** – Protects systems and data through advanced threat detection and AI-driven security solutions.
-   - 📧 **Contact:** [Cybersecurity@SaphyreSolutions.com](mailto:Cybersecurity@SaphyreSolutions.com)
-
-🔹 **Data Engineering Team** – Develops and manages data pipelines, ensuring efficient data flow and analysis.
-   - 📧 **Contact:** [Data@SaphyreSolutions.com](mailto:Data@SaphyreSolutions.com)
-
-🔹 **Network Engineering Team** – Optimizes and secures network systems to ensure top performance and reliability.
-   - 📧 **Contact:** [Network@SaphyreSolutions.com](mailto:Network@SaphyreSolutions.com)
-
-🔹 **Frontend Development Team** – Crafts responsive, accessible, and user-friendly interfaces.
-   - 📧 **Contact:** [Frontend@SaphyreSolutions.com](mailto:Frontend@SaphyreSolutions.com)
-
-🔹 **New Developers & Mentorship Team** – Dedicated to onboarding new developers, providing mentorship, and fostering continuous learning.
-   - 📧 **Contact:** [Mentorship@SaphyreSolutions.com](mailto:Mentorship@SaphyreSolutions.com)
-
-Each team is built on **collaboration**, **growth**, and **excellence**. If you see a team that aligns with your skills or aspirations, we’d love to hear from you! If you see a team that aligns with your skills or aspirations, we’d love to hear from you!
 
 ## 🚀 Join the Team
 
