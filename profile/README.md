@@ -33,7 +33,6 @@ At **Saphyre Solutions LLC**, we drive innovation through diverse, cutting-edge 
 
 Through these domains, **Saphyre Solutions LLC** continues to push technological boundaries while fostering a collaborative and supportive environment for all team members.
 
-
 ## 🚀 Join the Team
 
 At **Saphyre Solutions LLC**, we’re always excited to welcome new talent. Whether you're a seasoned developer, an aspiring tech enthusiast, or someone passionate about innovation, there's a space for you to grow, collaborate, and make an impact.
@@ -59,4 +58,36 @@ Explore our repositories, connect with our teams, and help shape the future of t
 
 ---
 
+## 📢 Contacting Our Organization
+
+We value communication and transparency at **Saphyre Solutions LLC**. Whether you're a potential collaborator, contributor, or just curious about our work, we encourage you to reach out. To facilitate seamless interaction with our teams, we've created a **dedicated contact directory** that details how to connect with specific departments and individuals.
+
+### 🔹 **How to Reach Us**
+
+- **General Inquiries:** For any general questions or if you're unsure which team to contact, feel free to reach out at [info@SaphyreSolutions.com](mailto:Tim.Spurlin@SaphyreSolutions.com).
+- **Specific Teams:** If you know which team you'd like to connect with, check out our comprehensive **Contact Directory**.
+
+### 🔹 **Explore Our Contact Directory**
+
+To ensure your queries are directed to the right people, we’ve created a detailed, easy-to-navigate contact hub:
+
+🔗 **[Saphyre Solutions Contact Directory](https://github.com/Saphyre-Solutions-LLC/Contact-Directory-ORG.git)**
+
+Here’s what you’ll find:
+
+- **Team-Specific Contacts:** Get in touch with our Software Development, DevOps, Cloud Engineering, Cybersecurity, Data Engineering, and more.
+- **Roles & Responsibilities:** Understand each team’s function within the organization so you know exactly who to reach out to for your specific needs.
+- **Direct Links to Repositories:** Quickly navigate to team repositories for deeper insights into ongoing projects.
+
+### 🔹 **Why Use the Contact Directory?**
+
+Our Contact Directory isn’t just a list of emails—it’s a **strategic tool** designed to streamline communication within our organization. Whether you're reporting a bug, proposing a collaboration, or seeking mentorship, the directory ensures your message reaches the right team swiftly.
+
+- **Easy Navigation:** Each team has its own dedicated section, complete with responsibilities and direct contact links.
+- **Transparency:** You’ll know exactly who you’re talking to and their role within the company.
+- **Quick Access to Resources:** Each contact page includes relevant links to documentation and ongoing projects.
+
+---
+
 **Explore | Connect | Innovate** with **Saphyre Solutions LLC**.
+
