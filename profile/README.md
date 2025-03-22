@@ -104,6 +104,22 @@ Let us help you **shine in the most competitive industry on Earth**—with tools
 Together, we’re not just building software.  
 **We’re building a future.**
 
+Here's your updated section with the **application form link** clearly added under the "🙋‍♂️ Get Involved" section:
+
+---
+
+## 🙋‍♂️ Get Involved
+
+Interested?
+
+📌 **Submit your application to join Saphyre Solutions as a member here:**  
+👉 [Apply Now via Microsoft Forms](https://forms.office.com/Pages/ResponsePage.aspx?id=DQSIkWdsW0yxEjajBLZtrQAAAAAAAAAAAAN__4XGFdtUNEJZTUxaQUVPUTJPQ0s2VEJOUTVUTU5DSC4u)
+
+Let’s build, grow, and innovate—together.
+
+---
+
+Let me know if you want to embed a button or QR code too.
 ---
 
 ## 📲 Questions? Want to Join?
