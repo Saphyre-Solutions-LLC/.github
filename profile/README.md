@@ -96,6 +96,44 @@ If you love tech, if you want to learn, grow, and build without limits—**you b
 
 # ✨ Join Us
 
+## 🔐 Secure Access to Our GitHub Organization
+
+All approved members must use **Microsoft Entra Single Sign-On (SSO)** to access our private repositories, tools, and Teams.
+
+### 👉 [Already a Member? Click here to Sign In](https://github.com/orgs/Saphyre-Solutions-LLC/sso)
+
+> _Don't have access yet? Keep reading._
+
+---
+
+## 📝 Not a Member Yet? Apply to Join Saphyre Solutions
+
+We’re excited to welcome passionate collaborators, volunteers, and contributors to our team! Whether you're a cloud builder, AI enthusiast, designer, writer, or just tech-curious—we want you here.
+
+### 📍 Step 1: Submit Your Application
+
+Click below to fill out our short form. You’ll be asked for your name, email, GitHub username, and your preferred team.
+
+### ➡️ [Apply Here](https://forms.office.com/Pages/ResponsePage.aspx?id=DQSIkWdsW0yxEjajBLZtrQAAAAAAAAAAAAN__4XGFdtUNEJZTUxaQUVPUTJPQ0s2VEJOUTVUTU5DSC4u)
+
+---
+
+## 🧭 What Happens After You Apply?
+
+1. 🔎 We’ll review your application within 24–48 hours.  
+2. 📧 If accepted, you’ll receive an email with onboarding instructions.  
+3. 🔐 You’ll then log in using the **SSO link above** and gain access to GitHub, Teams, and more.
+
+---
+
+Let me know if you want:
+
+- A version for **GitHub README** (Markdown)
+- An **HTML snippet** for a website
+- A **button version** for a landing page or Teams tab
+- A **QR code** to include in documents or slides
+
+This final section should be the **closing hook**. It turns interest into action.
 Don’t let this moment pass you by.  
 Apply for one of the 25 seats and start your journey with **Saphyre Solutions** today.
 
@@ -104,8 +142,6 @@ Let us help you **shine in the most competitive industry on Earth**—with tools
 Together, we’re not just building software.  
 **We’re building a future.**
 
-Here's your updated section with the **application form link** clearly added under the "🙋‍♂️ Get Involved" section:
-
 ---
 
 ## 🙋‍♂️ Get Involved
@@ -113,7 +149,7 @@ Here's your updated section with the **application form link** clearly added und
 Interested?
 
 📌 **Submit your application to join Saphyre Solutions as a member here:**  
-👉 [Apply Now via Microsoft Forms](https://forms.office.com/Pages/ResponsePage.aspx?id=DQSIkWdsW0yxEjajBLZtrQAAAAAAAAAAAAN__4XGFdtUNEJZTUxaQUVPUTJPQ0s2VEJOUTVUTU5DSC4u)
+👉 [Begin Your Journey](https://forms.office.com/Pages/ResponsePage.aspx?id=DQSIkWdsW0yxEjajBLZtrQAAAAAAAAAAAAN__4XGFdtUNEJZTUxaQUVPUTJPQ0s2VEJOUTVUTU5DSC4u)
 
 Let’s build, grow, and innovate—together.
 
