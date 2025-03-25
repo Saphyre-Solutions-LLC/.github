@@ -1,3 +1,9 @@
+### 🔐 Secure Access to Our GitHub Organization
+All members must use Microsoft Entra SSO to access private repositories.
+
+👉 [Click here to Sign In with SSO](https://github.com/orgs/Saphyre-Solutions-LLC/sso)
+
+
 # 🌐 Welcome to Saphyre Solutions LLC
 
 **Saphyre Solutions** isn’t just another tech organization—it’s a *movement*. A rare, *life-changing opportunity* for 25 individuals to join a community that values **skill, passion, and potential** over pedigree. Built by a **disabled veteran** with a heart for helping others, and powered by an **official partnership with Microsoft**, Saphyre Solutions exists to level the playing field—**making world-class developer tools and cloud services accessible to those who need it most**.
