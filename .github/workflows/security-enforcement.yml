@@ -1,0 +1,236 @@
+name: 🔒 Repository Security Enforcement
+
+on:
+  repository_dispatch:
+    types: [security-enforcement]
+  schedule:
+    # Run security enforcement check weekly on Sundays at 3 AM UTC
+    - cron: '0 3 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  administration: write
+  security-events: write
+
+jobs:
+  enforce-security-settings:
+    name: 🛡️ Enforce Security Settings
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: 🔧 Configure Repository Security Settings
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ secrets.ADMIN_TOKEN }}
+        script: |
+          const owner = context.repo.owner;
+          const repo = context.repo.repo;
+          
+          console.log(`🔒 Enforcing security settings for ${owner}/${repo}`);
+          
+          try {
+            // Enable vulnerability alerts
+            await github.rest.repos.enableVulnerabilityAlerts({
+              owner: owner,
+              repo: repo
+            });
+            console.log('✅ Vulnerability alerts enabled');
+            
+            // Enable automated security fixes (Dependabot)
+            await github.rest.repos.enableAutomatedSecurityFixes({
+              owner: owner,
+              repo: repo
+            });
+            console.log('✅ Automated security fixes enabled');
+            
+            // Configure security and analysis features
+            await github.rest.repos.update({
+              owner: owner,
+              repo: repo,
+              security_and_analysis: {
+                secret_scanning: { status: 'enabled' },
+                secret_scanning_push_protection: { status: 'enabled' },
+                dependency_graph: { status: 'enabled' }
+              }
+            });
+            console.log('✅ Security and analysis features configured');
+            
+            // Get current branch protection rules
+            const branches = await github.rest.repos.listBranches({
+              owner: owner,
+              repo: repo,
+              protected: false
+            });
+            
+            // Protect main/master branches
+            const mainBranches = branches.data.filter(branch => 
+              ['main', 'master', 'develop'].includes(branch.name)
+            );
+            
+            for (const branch of mainBranches) {
+              try {
+                await github.rest.repos.updateBranchProtection({
+                  owner: owner,
+                  repo: repo,
+                  branch: branch.name,
+                  required_status_checks: {
+                    strict: true,
+                    checks: [
+                      { context: 'security-scanning' },
+                      { context: 'dependency-review' }
+                    ]
+                  },
+                  enforce_admins: true,
+                  required_pull_request_reviews: {
+                    required_approving_review_count: 2,
+                    dismiss_stale_reviews: true,
+                    require_code_owner_reviews: true,
+                    require_last_push_approval: true
+                  },
+                  restrictions: null,
+                  required_linear_history: true,
+                  allow_force_pushes: false,
+                  allow_deletions: false,
+                  block_creations: false,
+                  required_conversation_resolution: true
+                });
+                console.log(`✅ Branch protection enabled for ${branch.name}`);
+              } catch (error) {
+                console.log(`⚠️ Could not protect branch ${branch.name}: ${error.message}`);
+              }
+            }
+            
+            // Ensure security team has admin access
+            try {
+              await github.rest.teams.addOrUpdateRepoPermissionsInOrg({
+                org: owner,
+                team_slug: 'security-team',
+                owner: owner,
+                repo: repo,
+                permission: 'admin'
+              });
+              console.log('✅ Security team permissions configured');
+            } catch (error) {
+              console.log(`⚠️ Could not configure security team permissions: ${error.message}`);
+            }
+            
+          } catch (error) {
+            console.error(`❌ Error enforcing security settings: ${error.message}`);
+            throw error;
+          }
+
+  verify-security-compliance:
+    name: 🔍 Verify Security Compliance
+    runs-on: ubuntu-latest
+    needs: enforce-security-settings
+    
+    steps:
+    - name: 📊 Generate Security Compliance Report
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const owner = context.repo.owner;
+          const repo = context.repo.repo;
+          
+          console.log(`🔍 Generating security compliance report for ${owner}/${repo}`);
+          
+          let report = '# 🔒 Security Compliance Report\n\n';
+          report += `**Repository:** ${owner}/${repo}\n`;
+          report += `**Date:** ${new Date().toISOString()}\n\n`;
+          
+          // Check repository settings
+          const repoData = await github.rest.repos.get({
+            owner: owner,
+            repo: repo
+          });
+          
+          report += '## 📊 Repository Security Status\n\n';
+          
+          // Security features
+          report += '### 🛡️ Security Features\n';
+          report += `- **Vulnerability Alerts:** ${repoData.data.has_vulnerability_alerts_enabled ? '✅ Enabled' : '❌ Disabled'}\n`;
+          report += `- **Dependency Graph:** ${repoData.data.security_and_analysis?.dependency_graph?.status === 'enabled' ? '✅ Enabled' : '❌ Disabled'}\n`;
+          report += `- **Secret Scanning:** ${repoData.data.security_and_analysis?.secret_scanning?.status === 'enabled' ? '✅ Enabled' : '❌ Disabled'}\n`;
+          report += `- **Push Protection:** ${repoData.data.security_and_analysis?.secret_scanning_push_protection?.status === 'enabled' ? '✅ Enabled' : '❌ Disabled'}\n\n`;
+          
+          // Branch protection
+          report += '### 🌿 Branch Protection\n';
+          try {
+            const branches = await github.rest.repos.listBranches({
+              owner: owner,
+              repo: repo,
+              protected: true
+            });
+            
+            if (branches.data.length > 0) {
+              report += 'Protected branches:\n';
+              for (const branch of branches.data) {
+                report += `- **${branch.name}:** ✅ Protected\n`;
+              }
+            } else {
+              report += '❌ No protected branches found\n';
+            }
+          } catch (error) {
+            report += `❌ Error checking branch protection: ${error.message}\n`;
+          }
+          
+          report += '\n### 🚨 Security Alerts\n';
+          
+          // Check for security alerts
+          try {
+            const alerts = await github.rest.codeScanning.listAlertsForRepo({
+              owner: owner,
+              repo: repo,
+              state: 'open'
+            });
+            
+            if (alerts.data.length > 0) {
+              report += `⚠️ **${alerts.data.length} open security alerts**\n`;
+              alerts.data.slice(0, 5).forEach(alert => {
+                report += `- ${alert.rule.severity}: ${alert.rule.description}\n`;
+              });
+              if (alerts.data.length > 5) {
+                report += `- ... and ${alerts.data.length - 5} more\n`;
+              }
+            } else {
+              report += '✅ No open security alerts\n';
+            }
+          } catch (error) {
+            report += `ℹ️ Could not check security alerts: ${error.message}\n`;
+          }
+          
+          report += '\n---\n\n';
+          report += '> This report was automatically generated by our security compliance system.\n';
+          report += '> For questions, contact: security@SaphyreSolutions.com';
+          
+          console.log('📋 Security Compliance Report:');
+          console.log(report);
+          
+          // Create or update compliance issue
+          const issues = await github.rest.issues.listForRepo({
+            owner: owner,
+            repo: repo,
+            labels: 'security,compliance,automated',
+            state: 'open'
+          });
+          
+          if (issues.data.length === 0) {
+            await github.rest.issues.create({
+              owner: owner,
+              repo: repo,
+              title: '🔒 Security Compliance Report',
+              body: report,
+              labels: ['security', 'compliance', 'automated']
+            });
+          } else {
+            await github.rest.issues.update({
+              owner: owner,
+              repo: repo,
+              issue_number: issues.data[0].number,
+              body: report
+            });
+          }

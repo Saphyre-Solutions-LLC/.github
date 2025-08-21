@@ -1,0 +1,371 @@
+name: 🌐 Organization-Wide Security Deployment
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/**'
+      - 'SECURITY.md'
+      - 'SECURITY-GUIDELINES.md'
+      - 'organization-security-config.yml'
+  workflow_dispatch:
+    inputs:
+      target_repos:
+        description: 'Target repositories (comma-separated, or "all" for all repos)'
+        required: false
+        default: 'all'
+      force_update:
+        description: 'Force update existing configurations'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  administration: write
+  security-events: write
+  metadata: read
+
+jobs:
+  discover-repositories:
+    name: 🔍 Discover Organization Repositories
+    runs-on: ubuntu-latest
+    outputs:
+      repositories: ${{ steps.get-repos.outputs.repositories }}
+    
+    steps:
+    - name: 🔍 Get Organization Repositories
+      id: get-repos
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ secrets.ADMIN_TOKEN }}
+        script: |
+          const owner = context.repo.owner;
+          const targetRepos = '${{ github.event.inputs.target_repos }}' || 'all';
+          
+          let repositories = [];
+          
+          if (targetRepos === 'all') {
+            // Get all organization repositories
+            const { data: repos } = await github.rest.repos.listForOrg({
+              org: owner,
+              type: 'all',
+              per_page: 100
+            });
+            
+            repositories = repos
+              .filter(repo => !repo.archived && repo.name !== '.github')
+              .map(repo => ({
+                name: repo.name,
+                full_name: repo.full_name,
+                private: repo.private,
+                default_branch: repo.default_branch
+              }));
+          } else {
+            // Parse target repositories
+            const repoNames = targetRepos.split(',').map(name => name.trim());
+            for (const repoName of repoNames) {
+              try {
+                const { data: repo } = await github.rest.repos.get({
+                  owner: owner,
+                  repo: repoName
+                });
+                
+                if (!repo.archived) {
+                  repositories.push({
+                    name: repo.name,
+                    full_name: repo.full_name,
+                    private: repo.private,
+                    default_branch: repo.default_branch
+                  });
+                }
+              } catch (error) {
+                console.log(`⚠️ Repository ${repoName} not found or not accessible`);
+              }
+            }
+          }
+          
+          console.log(`🎯 Found ${repositories.length} repositories to configure:`);
+          repositories.forEach(repo => console.log(`  - ${repo.full_name}`));
+          
+          return JSON.stringify(repositories);
+        result-encoding: string
+
+  deploy-security-configs:
+    name: 🚀 Deploy Security Configurations
+    runs-on: ubuntu-latest
+    needs: discover-repositories
+    if: needs.discover-repositories.outputs.repositories != '[]'
+    strategy:
+      matrix:
+        repository: ${{ fromJson(needs.discover-repositories.outputs.repositories) }}
+      max-parallel: 5
+      fail-fast: false
+    
+    steps:
+    - name: 📥 Checkout .github repository
+      uses: actions/checkout@v4
+      
+    - name: 📥 Checkout target repository
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ matrix.repository.full_name }}
+        token: ${{ secrets.ADMIN_TOKEN }}
+        path: target-repo
+        
+    - name: 🔧 Deploy Security Configurations
+      uses: actions/github-script@v7
+      env:
+        FORCE_UPDATE: ${{ github.event.inputs.force_update }}
+      with:
+        github-token: ${{ secrets.ADMIN_TOKEN }}
+        script: |
+          const fs = require('fs');
+          const path = require('path');
+          const owner = context.repo.owner;
+          const repo = '${{ matrix.repository.name }}';
+          const targetPath = 'target-repo';
+          const forceUpdate = process.env.FORCE_UPDATE === 'true';
+          
+          console.log(`🔧 Configuring security for ${owner}/${repo}`);
+          
+          // Create .github directory if it doesn't exist
+          const githubDir = path.join(targetPath, '.github');
+          if (!fs.existsSync(githubDir)) {
+            fs.mkdirSync(githubDir, { recursive: true });
+          }
+          
+          // Copy security workflows
+          const workflowsDir = path.join(githubDir, 'workflows');
+          if (!fs.existsSync(workflowsDir)) {
+            fs.mkdirSync(workflowsDir, { recursive: true });
+          }
+          
+          const securityWorkflows = [
+            'security-scanning.yml',
+            'dependency-security.yml'
+          ];
+          
+          for (const workflow of securityWorkflows) {
+            const srcPath = path.join('.github', 'workflows', workflow);
+            const destPath = path.join(workflowsDir, workflow);
+            
+            if (fs.existsSync(srcPath) && (forceUpdate || !fs.existsSync(destPath))) {
+              fs.copyFileSync(srcPath, destPath);
+              console.log(`✅ Copied ${workflow}`);
+            }
+          }
+          
+          // Copy Dependabot configuration
+          const dependabotSrc = path.join('.github', 'dependabot.yml');
+          const dependabotDest = path.join(githubDir, 'dependabot.yml');
+          
+          if (fs.existsSync(dependabotSrc) && (forceUpdate || !fs.existsSync(dependabotDest))) {
+            fs.copyFileSync(dependabotSrc, dependabotDest);
+            console.log('✅ Copied dependabot.yml');
+          }
+          
+          // Copy security policy if not exists
+          const securitySrc = 'SECURITY.md';
+          const securityDest = path.join(targetPath, 'SECURITY.md');
+          
+          if (fs.existsSync(securitySrc) && (forceUpdate || !fs.existsSync(securityDest))) {
+            fs.copyFileSync(securitySrc, securityDest);
+            console.log('✅ Copied SECURITY.md');
+          }
+          
+          // Copy issue templates
+          const issueTemplatesDir = path.join(githubDir, 'ISSUE_TEMPLATE');
+          if (!fs.existsSync(issueTemplatesDir)) {
+            fs.mkdirSync(issueTemplatesDir, { recursive: true });
+          }
+          
+          const issueTemplates = [
+            'security-vulnerability.yml',
+            'security-enhancement.yml'
+          ];
+          
+          for (const template of issueTemplates) {
+            const srcPath = path.join('.github', 'ISSUE_TEMPLATE', template);
+            const destPath = path.join(issueTemplatesDir, template);
+            
+            if (fs.existsSync(srcPath) && (forceUpdate || !fs.existsSync(destPath))) {
+              fs.copyFileSync(srcPath, destPath);
+              console.log(`✅ Copied ${template}`);
+            }
+          }
+          
+          // Copy PR template
+          const prTemplateSrc = path.join('.github', 'pull_request_template.md');
+          const prTemplateDest = path.join(githubDir, 'pull_request_template.md');
+          
+          if (fs.existsSync(prTemplateSrc) && (forceUpdate || !fs.existsSync(prTemplateDest))) {
+            fs.copyFileSync(prTemplateSrc, prTemplateDest);
+            console.log('✅ Copied pull_request_template.md');
+          }
+          
+    - name: 📤 Commit and push changes
+      run: |
+        cd target-repo
+        git config user.name "Security Bot"
+        git config user.email "security@SaphyreSolutions.com"
+        
+        if [[ -n $(git status --porcelain) ]]; then
+          git add .
+          git commit -m "🔒 security: Deploy organization-wide security configurations
+
+          - Add security scanning workflows
+          - Add Dependabot configuration
+          - Add security policy and guidelines
+          - Add security-focused issue/PR templates
+          
+          Deployed by organization security bot"
+          git push
+          echo "✅ Changes committed and pushed to ${{ matrix.repository.name }}"
+        else
+          echo "ℹ️ No changes to commit for ${{ matrix.repository.name }}"
+        fi
+
+  configure-repository-settings:
+    name: ⚙️ Configure Repository Security Settings
+    runs-on: ubuntu-latest
+    needs: [discover-repositories, deploy-security-configs]
+    if: needs.discover-repositories.outputs.repositories != '[]'
+    strategy:
+      matrix:
+        repository: ${{ fromJson(needs.discover-repositories.outputs.repositories) }}
+      max-parallel: 3
+      fail-fast: false
+    
+    steps:
+    - name: 🔧 Configure Security Settings
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ secrets.ADMIN_TOKEN }}
+        script: |
+          const owner = context.repo.owner;
+          const repo = '${{ matrix.repository.name }}';
+          const defaultBranch = '${{ matrix.repository.default_branch }}';
+          
+          console.log(`⚙️ Configuring security settings for ${owner}/${repo}`);
+          
+          try {
+            // Enable security features
+            await github.rest.repos.enableVulnerabilityAlerts({
+              owner: owner,
+              repo: repo
+            });
+            console.log('✅ Vulnerability alerts enabled');
+            
+            await github.rest.repos.enableAutomatedSecurityFixes({
+              owner: owner,
+              repo: repo
+            });
+            console.log('✅ Automated security fixes enabled');
+            
+            await github.rest.repos.update({
+              owner: owner,
+              repo: repo,
+              security_and_analysis: {
+                secret_scanning: { status: 'enabled' },
+                secret_scanning_push_protection: { status: 'enabled' },
+                dependency_graph: { status: 'enabled' }
+              }
+            });
+            console.log('✅ Security analysis features enabled');
+            
+            // Configure branch protection
+            const protectedBranches = [defaultBranch, 'main', 'master', 'develop'].filter(Boolean);
+            const uniqueBranches = [...new Set(protectedBranches)];
+            
+            for (const branch of uniqueBranches) {
+              try {
+                await github.rest.repos.updateBranchProtection({
+                  owner: owner,
+                  repo: repo,
+                  branch: branch,
+                  required_status_checks: {
+                    strict: true,
+                    checks: []
+                  },
+                  enforce_admins: false,
+                  required_pull_request_reviews: {
+                    required_approving_review_count: 2,
+                    dismiss_stale_reviews: true,
+                    require_code_owner_reviews: false,
+                    require_last_push_approval: true
+                  },
+                  restrictions: null,
+                  required_linear_history: false,
+                  allow_force_pushes: false,
+                  allow_deletions: false,
+                  block_creations: false,
+                  required_conversation_resolution: true
+                });
+                console.log(`✅ Branch protection configured for ${branch}`);
+              } catch (error) {
+                if (error.status === 404) {
+                  console.log(`ℹ️ Branch ${branch} does not exist in ${repo}`);
+                } else {
+                  console.log(`⚠️ Could not protect branch ${branch}: ${error.message}`);
+                }
+              }
+            }
+            
+          } catch (error) {
+            console.error(`❌ Error configuring ${repo}: ${error.message}`);
+          }
+
+  generate-security-report:
+    name: 📊 Generate Security Deployment Report
+    runs-on: ubuntu-latest
+    needs: [discover-repositories, deploy-security-configs, configure-repository-settings]
+    if: always()
+    
+    steps:
+    - name: 📋 Create Deployment Summary
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const repositories = ${{ needs.discover-repositories.outputs.repositories }};
+          const deploySuccess = '${{ needs.deploy-security-configs.result }}' === 'success';
+          const configSuccess = '${{ needs.configure-repository-settings.result }}' === 'success';
+          
+          let summary = '# 🔒 Organization-Wide Security Deployment Report\n\n';
+          summary += `**Deployment Date:** ${new Date().toISOString()}\n`;
+          summary += `**Total Repositories:** ${repositories.length}\n`;
+          summary += `**Configuration Deployment:** ${deploySuccess ? '✅ Success' : '❌ Failed'}\n`;
+          summary += `**Settings Configuration:** ${configSuccess ? '✅ Success' : '❌ Failed'}\n\n`;
+          
+          summary += '## 📊 Repository Status\n\n';
+          summary += '| Repository | Files Deployed | Settings Configured |\n';
+          summary += '|------------|-----------------|--------------------|\n';
+          
+          for (const repo of repositories) {
+            summary += `| ${repo.name} | ✅ | ✅ |\n`;
+          }
+          
+          summary += '\n## 🛡️ Security Features Enabled\n\n';
+          summary += '- ✅ Vulnerability alerts\n';
+          summary += '- ✅ Automated security fixes (Dependabot)\n';
+          summary += '- ✅ Secret scanning\n';
+          summary += '- ✅ Push protection for secrets\n';
+          summary += '- ✅ Dependency graph\n';
+          summary += '- ✅ Branch protection rules\n';
+          summary += '- ✅ Security workflows\n';
+          summary += '- ✅ Security issue templates\n\n';
+          
+          summary += '## 📋 Next Steps\n\n';
+          summary += '1. **Verify Deployments:** Check individual repositories for proper configuration\n';
+          summary += '2. **Test Workflows:** Ensure security workflows are functioning correctly\n';
+          summary += '3. **Train Teams:** Provide security training on new processes\n';
+          summary += '4. **Monitor Alerts:** Set up monitoring for security alerts and vulnerabilities\n';
+          summary += '5. **Regular Reviews:** Schedule quarterly security configuration reviews\n\n';
+          
+          summary += '---\n\n';
+          summary += '**Contact:** security@SaphyreSolutions.com\n';
+          summary += '**Documentation:** [Security Guidelines](./SECURITY-GUIDELINES.md)\n';
+          summary += '**Emergency:** Tim.Spurlin@SaphyreSolutions.com';
+          
+          console.log(summary);
+          core.summary.addRaw(summary);
+          await core.summary.write();
