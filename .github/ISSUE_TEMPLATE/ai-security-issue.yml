@@ -1,0 +1,221 @@
+---
+name: 🤖 AI Security Issue
+about: Report AI/ML specific security concerns
+title: '[AI-SECURITY] '
+labels: ['ai-security', 'security', 'ai-ml']
+assignees: ['']
+
+---
+
+## 🤖 AI Security Issue Report
+
+**Issue Type:**
+- [ ] Model Security
+- [ ] Training Data Exposure
+- [ ] Prompt Injection
+- [ ] API Key Exposure
+- [ ] AI Bias/Fairness
+- [ ] Model Poisoning
+- [ ] Adversarial Attack
+- [ ] Data Privacy
+- [ ] AI Ethics Violation
+- [ ] Other: ________________
+
+**Severity:**
+- [ ] Critical - Immediate threat to AI systems
+- [ ] High - Significant security risk
+- [ ] Medium - Moderate security concern
+- [ ] Low - Minor security issue
+
+## 🎯 AI Component Affected
+
+**Which AI/ML component is affected?**
+- [ ] GitHub Copilot Integration
+- [ ] OpenAI API Integration
+- [ ] Anthropic Claude Integration
+- [ ] Azure Cognitive Services
+- [ ] Custom AI Models
+- [ ] Training Data Pipeline
+- [ ] Model Inference API
+- [ ] AI Prompt Processing
+- [ ] Other: ________________
+
+**Repository/System:**
+<!-- Specify which repository or system contains the AI security issue -->
+
+## 📝 Detailed Description
+
+**What is the AI security issue?**
+<!-- Provide a detailed description of the AI-specific security concern -->
+
+**How does it relate to AI/ML functionality?**
+<!-- Explain the connection to AI/ML processes, models, or data -->
+
+**Potential AI-specific risks:**
+<!-- Describe risks unique to AI systems (model theft, data poisoning, etc.) -->
+
+## 🔍 AI Security Analysis
+
+**Training Data Concerns:**
+- [ ] Sensitive data in training sets
+- [ ] PII exposure in training data
+- [ ] Biased training data
+- [ ] Data poisoning risk
+- [ ] Unlicensed training data
+
+**Model Security Issues:**
+- [ ] Model stealing/extraction
+- [ ] Adversarial examples
+- [ ] Model inversion attacks
+- [ ] Membership inference
+- [ ] Model tampering
+
+**Prompt Security Problems:**
+- [ ] Prompt injection vulnerability
+- [ ] System prompt exposure
+- [ ] Jailbreaking attempts
+- [ ] Prompt leakage
+- [ ] Context manipulation
+
+**API Security Issues:**
+- [ ] API key exposure
+- [ ] Rate limiting bypass
+- [ ] Unauthorized model access
+- [ ] Cost abuse
+- [ ] Data exfiltration via API
+
+## 🎭 Reproduction for AI Issues
+
+**AI Environment Setup:**
+<!-- Describe the AI environment needed to reproduce the issue -->
+
+**Model/Service Configuration:**
+<!-- Include relevant model settings, API configurations, etc. -->
+
+**Input/Prompt Used:**
+```
+<!-- Include the prompt or input that triggers the issue (sanitize if needed) -->
+```
+
+**Expected AI Behavior:**
+<!-- What should the AI system do correctly? -->
+
+**Actual AI Behavior:**
+<!-- What does the AI system actually do that's problematic? -->
+
+## 🛡️ AI-Specific Mitigation
+
+**Recommended AI Security Measures:**
+<!-- Suggest AI-specific security controls -->
+
+**Model Protection Strategies:**
+<!-- Recommend ways to protect the AI models -->
+
+**Data Protection for AI:**
+<!-- Suggest measures to protect training and inference data -->
+
+**Prompt Security Measures:**
+<!-- Recommend prompt injection prevention strategies -->
+
+## 📊 AI Evidence
+
+**Model Outputs:**
+```
+<!-- Include relevant AI model outputs (sanitized) -->
+```
+
+**API Responses:**
+```json
+<!-- Include relevant API responses (remove sensitive data) -->
+```
+
+**Training Data Samples:**
+```
+<!-- Include small samples of problematic training data (if safe to share) -->
+```
+
+## 🌐 AI Environment Details
+
+**AI Framework/Library:**
+- [ ] OpenAI GPT Models
+- [ ] Anthropic Claude
+- [ ] Hugging Face Transformers
+- [ ] PyTorch
+- [ ] TensorFlow
+- [ ] LangChain
+- [ ] Other: ________________
+
+**Model Details:**
+- **Model Name/Version:** 
+- **Model Type:** 
+- **Training Date:** 
+- **Model Size:** 
+
+**API/Service Details:**
+- **Service Provider:** 
+- **API Version:** 
+- **Authentication Method:** 
+- **Rate Limits:** 
+
+## 🎯 AI Security Impact
+
+**Business Impact:**
+- [ ] Customer data exposure through AI
+- [ ] Intellectual property theft
+- [ ] Model performance degradation
+- [ ] Increased AI service costs
+- [ ] Regulatory compliance issues
+- [ ] Reputation damage
+
+**Technical Impact:**
+- [ ] Model corruption
+- [ ] Training data contamination
+- [ ] Service availability issues
+- [ ] Performance degradation
+- [ ] Resource consumption abuse
+
+## 📋 AI Security Checklist
+
+**Assessment:**
+- [ ] AI security risk properly classified
+- [ ] Model security evaluated
+- [ ] Training data security assessed
+- [ ] API security reviewed
+- [ ] Compliance implications considered
+
+**Remediation:**
+- [ ] AI-specific security controls implemented
+- [ ] Model protection measures added
+- [ ] Training data secured
+- [ ] Prompt injection prevention deployed
+- [ ] API security hardened
+- [ ] Monitoring and alerting configured
+
+## 🔗 Related Issues
+
+**Related to:**
+- [ ] Existing security vulnerability
+- [ ] Privacy compliance issue
+- [ ] Performance degradation
+- [ ] Cost optimization
+- [ ] Regulatory requirement
+
+**Dependencies:**
+<!-- List any related issues or dependencies -->
+
+---
+
+**AI Security Priority Matrix:**
+
+| Impact | Probability | Priority |
+|--------|-------------|----------|
+| High   | High        | P0       |
+| High   | Medium      | P1       |
+| Medium | High        | P1       |
+| Medium | Medium      | P2       |
+| Low    | High        | P2       |
+| Low    | Medium      | P3       |
+
+---
+
+**Thank you for helping secure our AI systems!** 🤖🔒
