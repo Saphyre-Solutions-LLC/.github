@@ -1,0 +1,276 @@
+name: 🤖 AI Security & Compliance
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - '**/*.py'
+      - '**/*.js'
+      - '**/*.ts'
+      - '**/*.json'
+      - '**/requirements.txt'
+      - '**/package.json'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - '**/*.py'
+      - '**/*.js'
+      - '**/*.ts'
+      - '**/*.json'
+      - '**/requirements.txt'
+      - '**/package.json'
+  schedule:
+    # Weekly AI security scan on Sundays at 3 AM UTC
+    - cron: '0 3 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  ai-dependency-scan:
+    name: 🔍 AI Dependencies Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 📦 Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: 🔍 Scan Python AI Dependencies
+        if: hashFiles('**/requirements.txt', '**/pyproject.toml', '**/Pipfile') != ''
+        run: |
+          echo "🔍 Scanning Python AI/ML dependencies for security issues..."
+          
+          # Common AI/ML packages that need security monitoring
+          ai_packages=(
+            "openai" "anthropic" "langchain" "transformers" "torch" "tensorflow"
+            "scikit-learn" "pandas" "numpy" "jupyter" "notebook" "huggingface-hub"
+            "azure-cognitiveservices" "google-cloud-aiplatform" "boto3"
+          )
+          
+          for package in "${ai_packages[@]}"; do
+            if find . -name "requirements*.txt" -exec grep -l "$package" {} \; >/dev/null 2>&1; then
+              echo "📦 Found AI package: $package"
+              # Check for version pinning
+              if find . -name "requirements*.txt" -exec grep "$package==" {} \; >/dev/null 2>&1; then
+                echo "✅ $package is version pinned"
+              else
+                echo "⚠️  $package is not version pinned - security risk!"
+              fi
+            fi
+          done
+
+      - name: 🔍 Scan JavaScript AI Dependencies
+        if: hashFiles('**/package.json') != ''
+        run: |
+          echo "🔍 Scanning JavaScript AI dependencies for security issues..."
+          
+          # Common AI/ML packages for Node.js
+          ai_packages=(
+            "openai" "@anthropic-ai/sdk" "langchain" "@tensorflow/tfjs"
+            "@azure/cognitiveservices" "@google-cloud/aiplatform"
+            "huggingface" "transformers"
+          )
+          
+          for package in "${ai_packages[@]}"; do
+            if find . -name "package.json" -exec grep -l "\"$package\"" {} \; >/dev/null 2>&1; then
+              echo "📦 Found AI package: $package"
+            fi
+          done
+
+  prompt-injection-scan:
+    name: 🛡️ Prompt Injection Vulnerability Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🔍 Scan for Prompt Injection Vulnerabilities
+        run: |
+          echo "🔍 Scanning for potential prompt injection vulnerabilities..."
+          
+          # Pattern 1: Direct user input concatenation
+          echo "Checking for direct user input concatenation..."
+          grep -rn "input.*+.*prompt\|prompt.*+.*input" . --include="*.py" --include="*.js" --include="*.ts" || echo "✅ No direct concatenation patterns found"
+          
+          # Pattern 2: Unsafe template formatting
+          echo "Checking for unsafe template formatting..."
+          grep -rn "f\".*{.*}.*\"\|format(.*user\|\.format.*input" . --include="*.py" || echo "✅ No unsafe formatting patterns found"
+          
+          # Pattern 3: Missing input sanitization
+          echo "Checking for input sanitization patterns..."
+          if grep -rn "input\|user.*data\|request\." . --include="*.py" --include="*.js" --include="*.ts" >/dev/null; then
+            echo "⚠️  User input detected - verify sanitization is implemented"
+            # Check for sanitization functions
+            if grep -rn "escape\|sanitize\|clean\|validate" . --include="*.py" --include="*.js" --include="*.ts" >/dev/null; then
+              echo "✅ Sanitization functions found"
+            else
+              echo "❌ No sanitization functions found - SECURITY RISK!"
+            fi
+          fi
+          
+          # Pattern 4: System prompt exposure
+          echo "Checking for system prompt exposure risks..."
+          grep -rn "system.*prompt\|role.*system" . --include="*.py" --include="*.js" --include="*.ts" || echo "✅ No system prompt patterns found"
+
+  ai-data-exposure-scan:
+    name: 🔒 AI Data Exposure Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🔍 Scan for AI Training Data Exposure
+        run: |
+          echo "🔍 Scanning for potential AI training data exposure..."
+          
+          # Check for large data files that might contain training data
+          echo "Checking for large data files..."
+          find . -type f \( -name "*.csv" -o -name "*.json" -o -name "*.jsonl" -o -name "*.txt" \) -size +1M | while read file; do
+            size=$(du -h "$file" | cut -f1)
+            echo "📊 Large data file: $file ($size)"
+            
+            # Sample the file to check for PII patterns
+            head -n 5 "$file" | grep -E "(email|phone|ssn|credit.*card|password)" >/dev/null 2>&1 && echo "⚠️  Potential PII detected in $file"
+          done
+          
+          # Check for model files
+          echo "Checking for model files..."
+          find . -type f \( -name "*.pkl" -o -name "*.pt" -o -name "*.pth" -o -name "*.h5" -o -name "*.pb" -o -name "*.onnx" \) | while read file; do
+            size=$(du -h "$file" | cut -f1)
+            echo "🤖 Model file: $file ($size)"
+          done
+
+      - name: 🔍 Check for API Key Exposure in AI Code
+        run: |
+          echo "🔍 Scanning for AI service API keys..."
+          
+          # OpenAI API keys
+          grep -rn "sk-[a-zA-Z0-9]\{32,\}" . --include="*.py" --include="*.js" --include="*.ts" --include="*.json" --include="*.env*" && echo "❌ Potential OpenAI API key found!" || echo "✅ No OpenAI API keys detected"
+          
+          # Anthropic API keys
+          grep -rn "sk-ant-[a-zA-Z0-9-]\{32,\}" . --include="*.py" --include="*.js" --include="*.ts" --include="*.json" --include="*.env*" && echo "❌ Potential Anthropic API key found!" || echo "✅ No Anthropic API keys detected"
+          
+          # Azure Cognitive Services keys
+          grep -rn "[a-f0-9]\{32\}" . --include="*.py" --include="*.js" --include="*.ts" | grep -i azure && echo "⚠️  Potential Azure key pattern found" || echo "✅ No Azure key patterns detected"
+          
+          # HuggingFace tokens
+          grep -rn "hf_[a-zA-Z0-9]\{34\}" . --include="*.py" --include="*.js" --include="*.ts" --include="*.json" --include="*.env*" && echo "❌ Potential HuggingFace token found!" || echo "✅ No HuggingFace tokens detected"
+
+  ai-model-security:
+    name: 🧠 AI Model Security Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🔍 AI Model Security Assessment
+        run: |
+          echo "🔍 Assessing AI model security practices..."
+          
+          # Check for model loading from untrusted sources
+          echo "Checking model loading patterns..."
+          grep -rn "torch\.load\|pickle\.load\|joblib\.load" . --include="*.py" | while read line; do
+            echo "⚠️  Model loading detected: $line"
+            echo "   Verify models are loaded from trusted sources only!"
+          done
+          
+          # Check for model download from URLs
+          echo "Checking for model downloads..."
+          grep -rn "download.*model\|urllib.*download\|requests\.get.*model" . --include="*.py" && echo "⚠️  Model download detected - verify source!" || echo "✅ No external model downloads detected"
+          
+          # Check for model serialization
+          echo "Checking model serialization patterns..."
+          grep -rn "torch\.save\|pickle\.dump\|joblib\.dump" . --include="*.py" | while read line; do
+            echo "📝 Model serialization: $line"
+          done
+
+  copilot-security-scan:
+    name: 🤖 GitHub Copilot Security Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🔍 Scan for Copilot-Generated Code Patterns
+        run: |
+          echo "🔍 Scanning for GitHub Copilot generated code patterns..."
+          
+          # Look for common Copilot comment patterns
+          echo "Checking for Copilot comment patterns..."
+          grep -rn "# Copilot\|// Copilot\|Generated by.*Copilot" . --include="*.py" --include="*.js" --include="*.ts" || echo "✅ No explicit Copilot markers found"
+          
+          # Check for TODO comments that might indicate AI-generated code needing review
+          echo "Checking for AI-related TODO comments..."
+          grep -rn "TODO.*AI\|TODO.*review\|FIXME.*AI" . --include="*.py" --include="*.js" --include="*.ts" || echo "✅ No AI-related TODO comments found"
+          
+          # Look for placeholder patterns common in AI-generated code
+          echo "Checking for placeholder patterns..."
+          grep -rn "your.*api.*key\|replace.*with\|change.*this\|placeholder" . --include="*.py" --include="*.js" --include="*.ts" || echo "✅ No obvious placeholders found"
+
+  ai-compliance-check:
+    name: 📋 AI Compliance Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🔍 AI Ethics and Compliance Check
+        run: |
+          echo "🔍 Checking AI ethics and compliance considerations..."
+          
+          # Check for bias testing
+          echo "Checking for bias testing patterns..."
+          grep -rn "bias.*test\|fairness.*test\|discrimination.*test" . --include="*.py" --include="*.js" --include="*.ts" || echo "⚠️  Consider adding bias testing for AI models"
+          
+          # Check for data consent patterns
+          echo "Checking for data consent handling..."
+          grep -rn "consent\|gdpr\|privacy.*policy" . --include="*.py" --include="*.js" --include="*.ts" || echo "⚠️  Consider adding explicit data consent handling"
+          
+          # Check for AI transparency
+          echo "Checking for AI transparency measures..."
+          grep -rn "explainable\|interpret.*ai\|transparency" . --include="*.py" --include="*.js" --include="*.ts" || echo "⚠️  Consider adding AI explainability features"
+
+  security-report:
+    name: 📊 Generate AI Security Report
+    runs-on: ubuntu-latest
+    needs: [ai-dependency-scan, prompt-injection-scan, ai-data-exposure-scan, ai-model-security, copilot-security-scan]
+    if: always()
+    steps:
+      - name: 📊 Generate Security Report
+        run: |
+          echo "📊 AI Security Scan Summary"
+          echo "=========================="
+          echo "Repository: ${{ github.repository }}"
+          echo "Branch: ${{ github.ref }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "Scan Date: $(date -u)"
+          echo ""
+          echo "🔍 Scans Completed:"
+          echo "  - AI Dependencies: ${{ needs.ai-dependency-scan.result }}"
+          echo "  - Prompt Injection: ${{ needs.prompt-injection-scan.result }}"
+          echo "  - Data Exposure: ${{ needs.ai-data-exposure-scan.result }}"
+          echo "  - Model Security: ${{ needs.ai-model-security.result }}"
+          echo "  - Copilot Security: ${{ needs.copilot-security-scan.result }}"
+          echo ""
+          echo "📋 Recommendations:"
+          echo "  - Regularly update AI dependencies"
+          echo "  - Implement input sanitization for AI prompts"
+          echo "  - Use environment variables for API keys"
+          echo "  - Review AI-generated code thoroughly"
+          echo "  - Implement bias testing for AI models"
+          echo "  - Ensure data consent for AI training"
+          echo ""
+          echo "For detailed results, check individual job outputs above."
